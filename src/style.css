@@ -1,0 +1,149 @@
+:root {
+    --nav-background-accent: rgb(51 65 85);
+    --nav-background: rgb(30 41 59);
+
+    --text-input-background: rgb(30 41 59);
+    --text-input-font: "Consolas", "Monaco";
+    --text-input-color: white;
+
+    --text-main: rgb(255 255 255);
+    --text-muted: rgb(148 163 184);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    overflow: hidden;
+}
+
+#menu-bar {
+    background-color: var(--nav-background-accent);
+    font-weight: normal;
+    color: rgb(203 213 225);;
+    padding-left: 10px;
+    padding-right: 10px;
+    display: flex;
+}
+
+#menu-bar #name {
+    font-weight: bold;
+}
+
+#menu-bar li {
+    user-select: none;
+    text-decoration: none;
+    display: inline-block;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    padding: 5px 10px 5px 10px;
+    height: 100%;
+    position: relative;
+    cursor: pointer;
+}
+
+#menu-bar .menu-button:hover {
+    background-color: var(--nav-background);
+}
+
+#menu-bar .menu-button:hover .dropdown {
+    opacity: 1;
+    visibility: visible;
+}
+
+.dropdown {
+    position: absolute;
+    margin-top: 5px;
+    background-color: var(--nav-background);
+    gap: 0.5rem;
+    flex-direction: column;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 200ms ease-in-out;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    width: 200px;
+}
+
+.dropdown li {
+    list-style: none;
+    transition: background-color 200ms ease-in-out;
+    justify-content: space-between;
+    width: 100%;
+    display: flex;
+}
+
+.dropdown li .icon {
+    display: inline-block;
+    vertical-align: middle;
+    height: 1em;
+    width: 1em;
+}
+
+.dropdown li p {
+    display:inline-block;
+    vertical-align:middle;
+    color: var(--text-main);
+}
+
+.dropdown li .button-tooltip {
+    float: right;
+    color: var(--text-muted);
+}
+
+.dropdown li:hover {
+    background-color: var(--nav-background-accent);
+}
+
+/* .dropdown li .icon {
+    height: 16px;
+    margin: 2px;
+    float: left;
+}
+
+.dropdown li p {
+    white-space: nowrap;
+    display: flex;
+}
+
+.dropdown li .button-text {
+    display: flex;
+}
+
+.dropdown li .button-tooltip {
+    display: flex;
+    float: right;
+    color: grey;
+} */
+
+canvas {
+    height: 100%;
+    position: absolute;
+    top: 0;
+    z-index: 0;
+}
+
+header {
+    user-select: none;
+    position: absolute;
+    top: 0;
+    width: 100%;
+    z-index: 100;
+}
+
+#text-input {
+    top: 0;
+    width: 100%;
+    min-height: 20px;
+    height: auto;
+    padding: 5px 8px;
+
+    font-family: var(--text-input-font);
+    color: var(--text-input-color);
+
+    background-color: var(--nav-background);
+    border: 0;
+    border-bottom: 1px solid rgb(15 23 42);;
+    outline: none;
+}

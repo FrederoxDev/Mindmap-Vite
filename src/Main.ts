@@ -1,7 +1,6 @@
 import { createFileHandle, openFileHandle } from "./FileSystem";
 import "./style.css"
 import { calculateBounds, drawITextNode, editText, intersectsBounds } from "./TextNode";
-import { ITextNode } from "./types/ITextNode";
 
 const canvas = document.querySelector<HTMLCanvasElement>("#canvas")!;
 const textInput = document.querySelector<HTMLInputElement>("#text-input")!;
@@ -45,6 +44,8 @@ function drawCanvas(): void {
         const parent = nodes[nodes[nodeKey].parent]
         
         ctx.beginPath()
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = "black"
         ctx.moveTo(self.x + self.bounds.width / 2, self.y + self.bounds.height / 2)
         ctx.lineTo(parent.x + parent.bounds.width / 2, parent.y + parent.bounds.height / 2)
         ctx.stroke()
@@ -52,7 +53,7 @@ function drawCanvas(): void {
 
     // Draw Nodes
     keys.forEach((nodeKey) => {
-        drawITextNode(ctx, nodes[nodeKey])
+        drawITextNode(ctx, nodes[nodeKey], nodeKey == selectedNodeId)
     })
 }
 
@@ -77,14 +78,12 @@ canvas.addEventListener("mouseup", () => {
 })
 
 canvas.addEventListener("mousemove", (e) => {
-    if (!mouseDown) return;
-
-    if (hasNodeSelected) {
+    if (hasNodeSelected && mouseDown) {
         nodes[selectedNodeId].x += e.clientX - mouseX
         nodes[selectedNodeId].y += e.clientY - mouseY
     }
 
-    else {
+    else if (mouseDown) {
         camX += e.clientX - mouseX
         camY += e.clientY - mouseY
     }
@@ -93,10 +92,10 @@ canvas.addEventListener("mousemove", (e) => {
     mouseY = e.clientY
 })
 
-canvas.addEventListener("wheel", (e) => {
-    scale *= 1 + (-e.deltaY / 1000);
-    if (scale > 1) scale = 1;
-})
+// canvas.addEventListener("wheel", (e) => {
+//     scale *= 1 + (-e.deltaY / 1000);
+//     if (scale > 1) scale = 1;
+// })
 //#endregion
 
 var hasNodeSelected = false;
@@ -106,6 +105,8 @@ canvas.addEventListener("mousedown", (e) => {
     const keys = Object.keys(nodes)
     const x = (e.clientX - camX)
     const y = (e.clientY - camY)
+
+    if (hasNodeSelected && intersectsBounds(nodes[selectedNodeId], x, y)) return
 
     selectedNodeId = ""
     hasNodeSelected = false
@@ -247,7 +248,40 @@ document.addEventListener("keydown", async (e) => {
         e.preventDefault()
         await exportPng()
     }
+    else if (e.ctrlKey && e.key == ".") {
+        createNode(e);
+    }
 })
 //#endregion
+
+const createNode = (e: any) => {
+    const uuid = crypto.randomUUID()
+
+    console.log(e)
+
+    const x = (mouseX - camX)
+    const y = (mouseY - camY)
+
+    console.log(x)
+    console.log(y)
+
+    nodes[uuid] = calculateBounds(ctx, {
+        type: "text",
+        text: "",
+        x: x,
+        y: y,
+        bounds: {
+            height: 0,
+            width: 0
+        }
+    })
+
+    if (hasNodeSelected) {
+        nodes[uuid].parent = selectedNodeId
+    }
+
+    selectedNodeId = uuid
+    hasNodeSelected = true
+}
 
 drawCanvas()

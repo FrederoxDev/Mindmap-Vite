@@ -4,7 +4,7 @@ const font = "30px Segoe UI"
 const cornerRadius = 5;
 const padding = 20;
 
-export const drawITextNode = (ctx: CanvasRenderingContext2D, node: ITextNode): void => {
+export const drawITextNode = (ctx: CanvasRenderingContext2D, node: ITextNode, isSelected: boolean): void => {
     ctx.beginPath()
     ctx.fillStyle = "#000"
 
@@ -17,6 +17,10 @@ export const drawITextNode = (ctx: CanvasRenderingContext2D, node: ITextNode): v
         cornerRadius
     )
     ctx.fill()
+
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = "green"
+    if (isSelected) ctx.stroke()
 
     ctx.font = font
     ctx.fillStyle = "#fff"

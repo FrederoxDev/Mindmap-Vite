@@ -9,7 +9,7 @@ const acceptedFiles = {
     ]
 }
 
-export const openFileHandle = async () => {
+export const openFileHandle = async (): Promise<FileSystemFileHandle | undefined> => {
     try {
         //@ts-ignore
         const [ handle ] = await window.showOpenFilePicker(acceptedFiles)
@@ -17,32 +17,32 @@ export const openFileHandle = async () => {
     }
 
     catch (err: any) {
-        if (err.stack == "Error: The user aborted a request.") {
+        if (err?.stack == "Error: The user aborted a request.") {
             console.log("User cancelled opening a file")
         }
 
         else {
-            console.warn(err.stack)
+            console.warn(JSON.stringify(err))
         }
 
         return undefined
     }
 }
 
-export const createFileHandle = async () => {
+export const createFileHandle = async (): Promise<FileSystemFileHandle | undefined> => {
     try {
         //@ts-ignore
-        const [ handle ] = await window.showSaveFilePicker(acceptedFiles)
+        const handle = await window.showSaveFilePicker(acceptedFiles)
         return handle
     }
 
     catch (err: any) {
-        if (err.stack == "Error: The user aborted a request.") {
+        if (err?.stack == "Error: The user aborted a request.") {
             console.log("User cancelled creating a file")
         }
 
         else {
-            console.warn(err.stack)
+            console.warn(JSON.stringify(err))
         }
 
         return undefined

@@ -1,4 +1,5 @@
 :root {
+    --nav-background-accent-2: rgb(71 85 105);
     --nav-background-accent: rgb(51 65 85);
     --nav-background: rgb(30 41 59);
 
@@ -6,6 +7,7 @@
     --text-input-font: "Consolas", "Monaco";
     --text-input-color: white;
 
+    --text-font: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     --text-main: rgb(255 255 255);
     --text-muted: rgb(148 163 184);
 }
@@ -37,7 +39,7 @@ body {
     user-select: none;
     text-decoration: none;
     display: inline-block;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: var(--text-font);
     padding: 5px 10px 5px 10px;
     height: 100%;
     position: relative;
@@ -96,27 +98,6 @@ body {
     background-color: var(--nav-background-accent);
 }
 
-/* .dropdown li .icon {
-    height: 16px;
-    margin: 2px;
-    float: left;
-}
-
-.dropdown li p {
-    white-space: nowrap;
-    display: flex;
-}
-
-.dropdown li .button-text {
-    display: flex;
-}
-
-.dropdown li .button-tooltip {
-    display: flex;
-    float: right;
-    color: grey;
-} */
-
 canvas {
     height: 100%;
     position: absolute;
@@ -146,4 +127,85 @@ header {
     border: 0;
     border-bottom: 1px solid rgb(15 23 42);;
     outline: none;
+    z-index: 1000 !important;
+}
+
+#toast-container {
+    position: absolute;
+    bottom: 20px;
+    left: 10px;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    border-radius: 7px;
+    overflow: hidden;
+    height: 2em;
+    display: flex;
+    vertical-align: middle;
+    opacity: 1;
+    transition: all 750ms ease-in-out;
+}
+
+#toast-container[hidden] {
+    transform: translateX(-400px);
+    opacity: 0;
+}
+
+#toast-sidecolor {
+    width: 10px;
+    height: 100%;
+    background-color: rgb(95, 204, 64);
+    display:inline-block;
+    vertical-align:middle;
+    margin-right: 5px;
+}
+
+#toast-message {
+    font-family: var(--text-font);
+    padding: 5px;
+    display:inline-block;
+    vertical-align: middle;
+    font-weight: bold;
+}
+
+#close-toast {
+    border: none;
+    background-color: transparent;
+    margin: 10px;
+    color: var(--text-muted);
+}
+
+#toast-icon {
+    color: rgb(95, 204, 64);
+    padding: 5px;
+}
+
+#no-open-file {
+    background-color: var(--nav-background-accent-2);
+    width: 100%;
+    height: 100vh;
+    vertical-align: middle;
+    padding-top: 50px;
+    align-items: center;
+    justify-content: center;
+}
+
+#no-open-file p {
+    font-family: var(--text-font);
+    font-weight: bold;
+    font-size: xx-large;
+    color: var(--text-main);
+    text-align: center;
+}
+
+.titletext {
+    font-family: var(--text-font);
+    font-weight: bold;
+    font-size: xx-large;
+    color: var(--text-main);
+    text-align: center;
+}
+
+#no-open-file .subtext {
+    font-size: x-large;
+    color: var(--text-muted);
+    font-weight: normal;
 }

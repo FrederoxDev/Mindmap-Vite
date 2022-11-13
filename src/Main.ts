@@ -1,8 +1,13 @@
+import { createFileHandle, openFileHandle } from "./FileSystem";
 import "./style.css"
 import { calculateBounds, drawITextNode, editText, intersectsBounds } from "./TextNode";
+import { ITextNode } from "./types/ITextNode";
 
 const canvas = document.querySelector<HTMLCanvasElement>("#canvas")!;
-const textInput = document.querySelector<HTMLInputElement>("#text-input")!
+const textInput = document.querySelector<HTMLInputElement>("#text-input")!;
+const toast = document.querySelector<HTMLDivElement>("#toast-container")!;
+const toastMessage = document.querySelector<HTMLParagraphElement>("#toast-message")!;
+const noFileOpen = document.querySelector<HTMLDivElement>("#no-open-file")!;
 
 const saveFileButton = document.querySelector("#save-button")!;
 const newFileButton = document.querySelector("#new-button")!;
@@ -94,31 +99,6 @@ canvas.addEventListener("wheel", (e) => {
 })
 //#endregion
 
-//#region Prepopulate Data
-nodes["uuid1"] = calculateBounds(ctx, {
-    type: "text",
-    text: "Hello World!",
-    x: 0,
-    y: 0,
-    bounds: {
-        height: 0,
-        width: 0
-    }
-})
-
-nodes["uuid2"] = calculateBounds(ctx, {
-    type: "text",
-    text: "Bye!",
-    parent: "uuid1",
-    x: 0,
-    y: 100,
-    bounds: {
-        height: 0,
-        width: 0
-    }
-})
-//#endregion
-
 var hasNodeSelected = false;
 var selectedNodeId = ""
 
@@ -160,20 +140,114 @@ canvas.addEventListener("mousedown", (e) => {
     textInput.focus()
 })
 
-const saveFile = async () => { console.log("save") }
-const newFile = async () => { console.log("new") }
-const openFile = async () => { console.log("open") }
+//#region File Actions
+var currentFileHandle: FileSystemFileHandle | undefined = undefined;
+var toastTimer: number | undefined = undefined;
 
-saveFileButton.addEventListener("click", saveFile)
+const showToast = (message: string) => {
+    toastMessage.innerText = message
+    toast.hidden = false;
+
+    clearTimeout(toastTimer)
+
+    toastTimer = setTimeout(() => {
+        toast.hidden = true
+    }, 5000)
+}
+
+const saveFile = async (hideToast = false) => { 
+    if (currentFileHandle == undefined) return;
+
+    //@ts-ignore
+    const writeable = await currentFileHandle.createWritable()
+    await writeable.write(JSON.stringify(nodes))
+    await writeable.close()
+
+    if (!hideToast) showToast("Saved Successfully!")
+}
+
+const newFile = async () => {
+    var newHandle = await createFileHandle()
+    if (newHandle == undefined) return;
+    if (currentFileHandle != undefined && !confirm("File is already open")) return;
+
+    console.log(currentFileHandle)
+    if (currentFileHandle == undefined) {
+        noFileOpen.hidden = true;
+    }
+
+    currentFileHandle = newHandle
+    nodes = {}
+
+    nodes[crypto.randomUUID()] = calculateBounds(ctx, {
+        type: "text",
+        text: "New Mindmap",
+        x: 0,
+        y: 0,
+        bounds: {
+            height: 0,
+            width: 0
+        }
+    })
+
+    hasNodeSelected = false
+    selectedNodeId = ""
+    textInput.hidden = true
+
+    await saveFile(true)
+}
+
+const openFile = async () => {
+    var newHandle = await openFileHandle()
+    if (newHandle == undefined) return;
+
+    if (currentFileHandle == undefined) {
+        noFileOpen.hidden = true;
+    }
+
+    if (currentFileHandle != undefined && !confirm("File is already open")) return;
+
+    try {
+        currentFileHandle = newHandle
+        var file = await currentFileHandle.getFile()
+        var fileText = await file.text()
+        nodes = JSON.parse(fileText)
+    }
+
+    catch (err: any) {
+        alert(err)
+        console.warn(err)
+    }
+}
+
+const exportPng = async () => {
+    console.warn("Export as PNG not implemented")
+}
+
+saveFileButton.addEventListener("click", () => {saveFile(false)})
 newFileButton.addEventListener("click", newFile)
 openFileButton.addEventListener("click", openFile)
 
 document.addEventListener("keydown", async (e) => {
-    e.preventDefault()
+    // Make sure to prevent default **before** awaiting for actions
 
-    if (e.ctrlKey && e.key == "s") await saveFile()
-    else if (e.ctrlKey && e.key == "n") await newFile()
-    else if (e.ctrlKey && e.key == "o") await openFile()
+    if (e.ctrlKey && e.key == "s") {
+        e.preventDefault()
+        await saveFile()
+    }
+    else if (e.altKey && e.key == "n") {
+        e.preventDefault()
+        await newFile()
+    }
+    else if (e.ctrlKey && e.key == "o") {
+        e.preventDefault()
+        await openFile()
+    }
+    else if (e.ctrlKey && e.key == "e") {
+        e.preventDefault()
+        await exportPng()
+    }
 })
+//#endregion
 
 drawCanvas()

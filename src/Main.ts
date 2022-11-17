@@ -55,6 +55,11 @@ function drawCanvas(): void {
     keys.forEach((nodeKey) => {
         drawITextNode(ctx, nodes[nodeKey], nodeKey == selectedNodeId)
     })
+
+    ctx.strokeStyle = "black"
+    ctx.beginPath()
+    ctx.arc(mouseX, mouseY, 100, 0, 0)
+    ctx.stroke()
 }
 
 //#region Mouse Controls
@@ -130,7 +135,9 @@ canvas.addEventListener("mousedown", (e) => {
 
     // Hide text input with Enter Key
     textInput.onkeyup = (e: KeyboardEvent) => {
-        editText(ctx, node, textInput.value)
+        if (!hasNodeSelected) return
+        console.log("onKeyUp")
+        editText(ctx, nodes[selectedNodeId], textInput.value)
 
         if (e.key == "Enter") {
             textInput.hidden = true
@@ -249,21 +256,17 @@ document.addEventListener("keydown", async (e) => {
         await exportPng()
     }
     else if (e.ctrlKey && e.key == ".") {
-        createNode(e);
+        e.preventDefault()
+        createNode();
     }
 })
 //#endregion
 
-const createNode = (e: any) => {
+const createNode = () => {
     const uuid = crypto.randomUUID()
-
-    console.log(e)
 
     const x = (mouseX - camX)
     const y = (mouseY - camY)
-
-    console.log(x)
-    console.log(y)
 
     nodes[uuid] = calculateBounds(ctx, {
         type: "text",
@@ -281,6 +284,8 @@ const createNode = (e: any) => {
     }
 
     selectedNodeId = uuid
+    textInput.value = nodes[uuid].text
+    textInput.hidden = false
     hasNodeSelected = true
 }
 

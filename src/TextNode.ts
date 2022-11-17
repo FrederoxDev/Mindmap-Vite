@@ -6,7 +6,7 @@ const padding = 20;
 
 export const drawITextNode = (ctx: CanvasRenderingContext2D, node: ITextNode, isSelected: boolean): void => {
     ctx.beginPath()
-    ctx.fillStyle = "#000"
+    ctx.fillStyle = "rgb(91 33 182)"
 
     //@ts-ignore
     ctx.roundRect(
@@ -18,8 +18,8 @@ export const drawITextNode = (ctx: CanvasRenderingContext2D, node: ITextNode, is
     )
     ctx.fill()
 
-    ctx.lineWidth = 3;
-    ctx.strokeStyle = "green"
+    ctx.lineWidth = 6;
+    ctx.strokeStyle = "rgb(76 29 149)"
     if (isSelected) ctx.stroke()
 
     ctx.font = font

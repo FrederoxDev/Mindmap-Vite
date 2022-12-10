@@ -2,11 +2,11 @@ import { ITextNode } from "./types/ITextNode";
 
 const font = "30px Segoe UI"
 const cornerRadius = 5;
-const padding = 20;
+const padding = 10;
 
 export const drawITextNode = (ctx: CanvasRenderingContext2D, node: ITextNode, isSelected: boolean): void => {
     ctx.beginPath()
-    ctx.fillStyle = "rgb(91 33 182)"
+    ctx.fillStyle = node.color
 
     //@ts-ignore
     ctx.roundRect(
@@ -18,7 +18,7 @@ export const drawITextNode = (ctx: CanvasRenderingContext2D, node: ITextNode, is
     )
     ctx.fill()
 
-    ctx.lineWidth = 6;
+    ctx.lineWidth = 2;
     ctx.strokeStyle = "rgb(76 29 149)"
     if (isSelected) ctx.stroke()
 

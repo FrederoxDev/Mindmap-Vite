@@ -45,7 +45,7 @@ function drawCanvas(): void {
         
         ctx.beginPath()
         ctx.lineWidth = 3;
-        ctx.strokeStyle = "black"
+        ctx.strokeStyle = self.color
         ctx.moveTo(self.x + self.bounds.width / 2, self.y + self.bounds.height / 2)
         ctx.lineTo(parent.x + parent.bounds.width / 2, parent.y + parent.bounds.height / 2)
         ctx.stroke()
@@ -212,7 +212,6 @@ const newFile = async () => {
     if (newHandle == undefined) return;
     if (currentFileHandle != undefined && !confirm("File is already open")) return;
 
-    console.log(currentFileHandle)
     if (currentFileHandle == undefined) {
         noFileOpen.hidden = true;
     }
@@ -228,7 +227,9 @@ const newFile = async () => {
         bounds: {
             height: 0,
             width: 0
-        }
+        },
+        color: randomColor(),
+        depth: 0
     })
 
     hasNodeSelected = false
@@ -292,8 +293,19 @@ document.addEventListener("keydown", async (e) => {
         e.preventDefault()
         createNode();
     }
+    else if (e.ctrlKey && e.key == "Delete") {
+        e.preventDefault()
+        if (hasNodeSelected) deleteNode(selectedNodeId)
+    }
 })
 //#endregion
+
+const randomColor = () => {
+    // Math.pow is slow, use constant instead.
+    var color = Math.floor(Math.random() * 16777216).toString(16);
+    // Avoid loops.
+    return '#000000'.slice(0, -color.length) + color;
+} 
 
 const createNode = () => {
     const uuid = crypto.randomUUID()
@@ -306,17 +318,28 @@ const createNode = () => {
         bounds: {
             height: 0,
             width: 0
-        }
+        },
+        color: randomColor(),
+        depth: 0
     })
 
     if (hasNodeSelected) {
         nodes[uuid].parent = selectedNodeId
+        nodes[uuid].depth = nodes[selectedNodeId].depth + 1
     }
 
     selectedNodeId = uuid
     textInput.value = nodes[uuid].text
     textInput.hidden = false
     hasNodeSelected = true
+}
+
+const deleteNode = (uuid: string) => {
+    Object.keys(nodes).filter(key => nodes[key].parent == uuid).forEach(key => deleteNode(key))
+    delete nodes[uuid];
+    if (uuid == selectedNodeId) {
+        hasNodeSelected = false
+    } 
 }
 
 drawCanvas()

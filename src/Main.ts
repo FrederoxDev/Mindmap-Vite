@@ -66,6 +66,8 @@ function drawCanvas(): void {
 var mouseX = 0;
 var mouseY = 0;
 var mouseDown: boolean = false;
+var clientX = 0;
+var clientY = 0;
 
 window.addEventListener("resize", () => {
     canvas.width = window.innerWidth;
@@ -73,8 +75,7 @@ window.addEventListener("resize", () => {
 })
 
 canvas.addEventListener("mousedown", (e) => {
-    mouseX = e.clientX
-    mouseY = e.clientY
+    scaleClientXY(e)
     mouseDown = true;
 })
 
@@ -83,35 +84,68 @@ canvas.addEventListener("mouseup", () => {
 })
 
 canvas.addEventListener("mousemove", (e) => {
+    const [iX, iY] = [mouseX, mouseY]
+    const {x, y} = scaleClientXY(e);
+
+    var deltaX = x - iX;
+    var deltaY = y - iY;
+    
     if (hasNodeSelected && mouseDown) {
-        nodes[selectedNodeId].x += e.clientX - mouseX
-        nodes[selectedNodeId].y += e.clientY - mouseY
+        nodes[selectedNodeId].x += deltaX
+        nodes[selectedNodeId].y += deltaY
     }
 
     else if (mouseDown) {
-        camX += e.clientX - mouseX
-        camY += e.clientY - mouseY
+        camX += e.clientX - clientX
+        camY += e.clientY - clientY
     }
 
-    mouseX = e.clientX
-    mouseY = e.clientY
+    clientX = e.clientX
+    clientY = e.clientY
 })
 
-// canvas.addEventListener("wheel", (e) => {
-//     scale *= 1 + (-e.deltaY / 1000);
-//     if (scale > 1) scale = 1;
-// })
+canvas.addEventListener("wheel", (e) => {
+    scale *= 1 + (-e.deltaY / 1000);
+    if (scale > 1) scale = 1;
+})
 //#endregion
 
 var hasNodeSelected = false;
 var selectedNodeId = ""
 
-canvas.addEventListener("mousedown", (e) => {
-    const keys = Object.keys(nodes)
-    const x = (e.clientX - camX)
-    const y = (e.clientY - camY)
+const scaleClientXY = (e: MouseEvent) => {
+    // Get the click position
+    var clickX = e.clientX;
+    var clickY = e.clientY;
 
-    if (hasNodeSelected && intersectsBounds(nodes[selectedNodeId], x, y)) return
+    // Get the canvas bounding rect
+    var rect = canvas.getBoundingClientRect();
+
+    // Calculate the click position relative to the top-left corner of the canvas
+    var canvasX = clickX - rect.left;
+    var canvasY = clickY - rect.top;
+
+    // Invert the translation transformation
+    var invertedCamX = -camX;
+    var invertedCamY = -camY;
+
+    // Invert the scaling transformation
+    var invertedScale = 1 / scale;
+
+    // Apply the inverse transformations to the click position
+    var x = (canvasX + invertedCamX) * invertedScale;
+    var y = (canvasY + invertedCamY) * invertedScale;
+
+    mouseX = x
+    mouseY = y
+
+    return {x, y}
+}
+
+canvas.addEventListener("mousedown", () => {
+    const keys = Object.keys(nodes)
+
+    if (hasNodeSelected && intersectsBounds(nodes[selectedNodeId], mouseX, mouseY)) return
 
     selectedNodeId = ""
     hasNodeSelected = false
@@ -119,7 +153,7 @@ canvas.addEventListener("mousedown", (e) => {
 
     // Iterate through each node and see if it intersects the mouse
     for (var i = 0; i < keys.length; i++) {
-        if (intersectsBounds(nodes[keys[i]], x, y)) {
+        if (intersectsBounds(nodes[keys[i]], mouseX, mouseY)) {
             hasNodeSelected = true
             selectedNodeId = keys[i]
             break
@@ -136,7 +170,6 @@ canvas.addEventListener("mousedown", (e) => {
     // Hide text input with Enter Key
     textInput.onkeyup = (e: KeyboardEvent) => {
         if (!hasNodeSelected) return
-        console.log("onKeyUp")
         editText(ctx, nodes[selectedNodeId], textInput.value)
 
         if (e.key == "Enter") {
@@ -265,14 +298,11 @@ document.addEventListener("keydown", async (e) => {
 const createNode = () => {
     const uuid = crypto.randomUUID()
 
-    const x = (mouseX - camX)
-    const y = (mouseY - camY)
-
     nodes[uuid] = calculateBounds(ctx, {
         type: "text",
         text: "",
-        x: x,
-        y: y,
+        x: mouseX,
+        y: mouseY,
         bounds: {
             height: 0,
             width: 0
